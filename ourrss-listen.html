@@ -1,0 +1,183 @@
+<!-- human.txt += Jamie Smith, i@jamiesmiths.com -->
+<dom-module id="ourrss-listen">
+	<template>
+		
+		<style>
+			
+			:host {
+				user-select: none;
+				width:100%;
+				height:100%;
+			}
+			
+			:host .grid-box {
+				display: grid;
+				grid-gap: 1rem;
+			    padding: 1rem 1rem 6.5rem 1rem;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			}
+			
+			:host .card {
+				background-color: #FFF;
+				color: #212121;
+				padding: 20px;
+				font-size: 150%;
+				/*width: 10rem;*/
+				height: 10rem;
+				transition: opacity ease-in 0.2s;
+				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+			}
+			
+			:host .card:hover {
+				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.38);
+			}
+			
+			/*:host .box:nth-child(even) {
+				background-color: #EEE;
+				color: #000;
+			}*/
+			
+		</style>
+		
+		<div id="gridBox" class="grid-box">
+			  
+		</div>
+		
+	</template>
+
+	<script>
+		/*global HTMLElement navigator localStorage MediaMetadata*/
+		class OurrssListen extends HTMLElement {
+			
+			init() {
+				this.registerElements()
+			}
+			
+			setProperties(){
+				this.is = 'ourrss-listen'
+				this.log = (msg) => msg ? console.log(msg) : ''
+				this.dump = (msg) => msg ? console.dir(msg) : console.dir(this)
+				this.error = (msg) => console.error(this.is, ' ', msg)
+				this.prom = (fn) => {
+					const promise = new Promise((resolve, reject) => {
+						fn()
+					})
+					return promise;
+				}
+			}
+			
+			// Fires when an instance was removed from the document.
+			detachedCallback() {
+				this.log('instance was removed.')
+			}
+		
+			// Fires when an attribute was added, removed, or updated.
+			attributeChangedCallback(attr, oldVal, newVal) {
+				
+				if(newVal){
+					this.log('-attr: ' + attr + '\n-oldVal: ' +  oldVal + ' \n-newVal: ' +  newVal)
+					
+					//'src' == attr ? this.dom.audio.src = newVal : ''
+				}
+			}
+			
+			// Fires when an instance was inserted into the document.
+			attachedCallback() {
+				var template = this.owner.querySelector('template')
+				var clone = document.importNode(template.content, true)
+				this.root = this.createShadowRoot()
+				this.root.appendChild(clone)
+				this.init()
+			}
+		
+			
+			// Fires when an instance of the element is created.
+			createdCallback() {
+				this.setProperties()
+				this.parseAttributes()
+
+				this.log('instance was created.')
+			}
+			
+			parseAttributes() {
+				
+				//this.name = this.getAttribute('name');
+
+				//this.something = parseInt(this.getAttribute('something'));
+			}
+			
+			registerElements() {
+				this.dom = {}
+				this.dom.gridBox = this.root.children.gridBox
+				this.dom.boxes = Array.from(this.root.children.gridBox.children)
+				
+				this.addListeners()
+				
+				console.dir(this.root.children.gridBox)
+			}
+			
+			addListeners(){
+				/*this.dom.boxes.map(box => {
+					box.onclick = function(e){
+						console.dir(this)
+						console.dir(e)
+					}
+				})*/
+				
+				this.ready()
+			}
+			
+			ready(){
+				
+				/*const config = {
+					apiKey: "AIzaSyDsmTVrTljx1CNXeWdRByWM-8SdbKhUizI"
+					,authDomain: "studied-biplane-87708.firebaseapp.com"
+					,databaseURL: "https://studied-biplane-87708.firebaseio.com"
+					,projectId: "studied-biplane-87708"
+				}*/
+				
+				this.mkCard('Radiolab', 'The Radio Lab', 'https://www.podtrac.com/pts/redirect.mp3/audio.wnyc.org/radiolab_podcast/radiolab_podcast17theradiolab.mp3', 'https://media2.wnyc.org/i/1400/1400/80/1/Radiolab_WNYCStudios_1400.png')
+				
+				this.mkCard('Doug Loves Movies', 'Mark Normand, Dale Cheesman and Jacob Sirof guest', 'https://feedproxy.google.com/~r/DougLovesMovies/~5/durZW7kvrz4/fdc0ff9d-a1ae-4bc3-a004-13bb30c5a87c.mp3', 'https://dfkfj8j276wwv.cloudfront.net/images/82/2f/79/e8/822f79e8-722d-4a6b-8647-8cc9741e87a9/f933e361a2ab293aa85d74f63a4ea343522012cae57c6efa04c518b09d5ad28201c3312b452e93b09b6e349f33b211553dedcf0b7ab4da2702d3680700b416ec.jpeg')
+				
+				this.mkCard('The Dollop', '263 - The Texas Hypnocult (Live in Austin)', 'https://traffic.libsyn.com/thedollop/Terri_Lee_Hoffman.mp3', 'https://static.libsyn.com/p/assets/6/a/9/6/6a96a1557e801d14/Dollop_small_square_1.jpg')
+				
+			}
+			
+			mkCard(name, title, src, image){
+				const card = document.createElement('div')
+				card.classList += 'card '
+				card.style.background = 'white url(' +image+ ') center no-repeat'
+				card.style.backgroundSize = 'contain'
+				
+				card.name = name
+				card.title = title
+				card.src = src
+				card.image = image
+				
+				card.onclick = function(e){
+					e.path.map(elem => {
+						if(String(elem.tagName).toLowerCase() === 'body'){
+							Array.from(elem.children).map(elem => {
+								if(String(elem.tagName).toLowerCase() === 'ourrss-player'){
+									elem.setAttribute('name', this.name)
+									elem.setAttribute('title', this.title)
+									elem.setAttribute('image', this.image)
+									elem.setAttribute('src', this.src)
+								}
+							})
+						}
+					})
+				}
+				
+				this.dom.gridBox.appendChild(card)
+			}
+			
+		}
+		
+		if (document.createElement('ourrss-listen').constructor !== OurrssListen) {
+			OurrssListen.prototype.owner = (document._currentScript || document.currentScript).ownerDocument;
+			document.registerElement('ourrss-listen', OurrssListen);
+		}
+	</script>
+</dom-module>
