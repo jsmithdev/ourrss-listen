@@ -5,16 +5,40 @@
 		<style>
 			
 			:host {
+				font-family:Ubuntu;
 				user-select: none;
 				width:100%;
 				height:100%;
+			}
+			
+			:host ::-webkit-scrollbar {
+			    width: .5rem;
+			}
+			 
+			:host ::-webkit-scrollbar-thumb {
+			    border-radius: 1rem;
+			    -webkit-box-shadow: inset 0 0 6px #0288D1; 
 			}
 			
 			:host .grid-box {
 				display: grid;
 				grid-gap: 1rem;
 			    padding: 1rem 1rem 6.5rem 1rem;
-				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				grid-template-columns: repeat(auto-fit, minmax(364px, 1fr));
+			}
+			@media (max-width: 450px) {
+				:host ::-webkit-scrollbar {
+				    display:none;
+				}
+				:host ::-webkit-scrollbar-thumb {
+				    display:none;
+				}
+				:host .grid-box {
+					display: grid;
+					grid-gap: 1rem;
+					padding: 1rem 1rem 6.5rem 1rem;
+					grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				}
 			}
 			
 			:host .card {
@@ -22,14 +46,32 @@
 				color: #212121;
 				padding: 20px;
 				font-size: 150%;
-				/*width: 10rem;*/
+				text-align: center;
 				height: 10rem;
-				transition: opacity ease-in 0.2s;
 				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+				-webkit-transition: all 0.2s ease-in-out;
+				-moz-transition: all 0.2s ease-in-out;
+				-o-transition: all 0.2s ease-in-out;
+				transition: all 0.2s ease-in-out;
 			}
 			
 			:host .card:hover {
 				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.38);
+			}
+			
+			:host img {
+				-webkit-transition: all 0.5s ease-in-out;
+				-moz-transition: all 0.5s ease-in-out;
+				-o-transition: all 0.5s ease-in-out;
+				transition: all 0.5s ease-in-out;
+			}
+			
+			:host .shrinkImage {
+				-webkit-transform: scale(.5);
+		        -ms-transform: scale(.5);
+		        transform: scale(.5);
+			    margin-top: -11%;
+			    border-radius: 50%;
 			}
 			
 			/*:host .box:nth-child(even) {
@@ -37,6 +79,18 @@
 				color: #000;
 			}*/
 			
+			:host .enc {
+				-webkit-transition: all 0.5s ease-in-out;
+				-moz-transition: all 0.5s ease-in-out;
+				-o-transition: all 0.5s ease-in-out;
+				transition: all 0.5s ease-in-out;
+				font-size: .8rem;
+			    font-family: Ubuntu;
+			    border: 1pt solid #afe0f6;
+			    vertical-align: middle;
+			    color: slategrey;
+			    padding: 1rem 0rem 1rem 0rem;
+			}
 		</style>
 		
 		<div id="gridBox" class="grid-box">
@@ -96,7 +150,7 @@
 				this.setProperties()
 				this.parseAttributes()
 
-				this.log('instance was created.')
+				// //console.log('instance was created.')
 			}
 			
 			parseAttributes() {
@@ -110,6 +164,7 @@
 				this.dom = {}
 				this.dom.gridBox = this.root.children.gridBox
 				this.dom.boxes = Array.from(this.root.children.gridBox.children)
+				this.dom.player = this.root.querySelector('ourrss-player')
 				
 				this.addListeners()
 				
@@ -127,47 +182,120 @@
 				this.ready()
 			}
 			
+			cancelBubble(){
+				if (!e) var e = window.event;
+				e.cancelBubble = true;
+			}
+			
 			ready(){
-				
-				/*const config = {
-					apiKey: "AIzaSyDsmTVrTljx1CNXeWdRByWM-8SdbKhUizI"
-					,authDomain: "studied-biplane-87708.firebaseapp.com"
-					,databaseURL: "https://studied-biplane-87708.firebaseio.com"
-					,projectId: "studied-biplane-87708"
-				}*/
-				
-				this.mkCard('Radiolab', 'The Radio Lab', 'https://www.podtrac.com/pts/redirect.mp3/audio.wnyc.org/radiolab_podcast/radiolab_podcast17theradiolab.mp3', 'https://media2.wnyc.org/i/1400/1400/80/1/Radiolab_WNYCStudios_1400.png')
-				
-				this.mkCard('Doug Loves Movies', 'Mark Normand, Dale Cheesman and Jacob Sirof guest', 'https://feedproxy.google.com/~r/DougLovesMovies/~5/durZW7kvrz4/fdc0ff9d-a1ae-4bc3-a004-13bb30c5a87c.mp3', 'https://dfkfj8j276wwv.cloudfront.net/images/82/2f/79/e8/822f79e8-722d-4a6b-8647-8cc9741e87a9/f933e361a2ab293aa85d74f63a4ea343522012cae57c6efa04c518b09d5ad28201c3312b452e93b09b6e349f33b211553dedcf0b7ab4da2702d3680700b416ec.jpeg')
-				
-				this.mkCard('The Dollop', '263 - The Texas Hypnocult (Live in Austin)', 'https://traffic.libsyn.com/thedollop/Terri_Lee_Hoffman.mp3', 'https://static.libsyn.com/p/assets/6/a/9/6/6a96a1557e801d14/Dollop_small_square_1.jpg')
 				
 			}
 			
-			mkCard(name, title, src, image){
-				const card = document.createElement('div')
-				card.classList += 'card '
-				card.style.background = 'white url(' +image+ ') center no-repeat'
-				card.style.backgroundSize = 'contain'
+			mkCard(aCasts){
+				console.dir(aCasts)
+				let name = aCasts.title
+				let feed = aCasts.feed
+				let image = aCasts.image ? aCasts.image : aCasts.img
+				console.log(image)
+				let epDivs = []
 				
+				aCasts.enc.map(enc => {
+					
+					const div = document.createElement('div')
+					div.pubDate = enc.pubDate
+					div.title = enc.title
+					div.src = enc.url
+					div.image = image
+					div.name = name
+					
+					const p1 = document.createElement('p')
+					p1.textContent = enc.title
+					
+					const p2 = document.createElement('p')
+					p2.textContent = enc.pubDate
+					
+					div.appendChild(p1)
+					div.appendChild(p2)
+					
+					div.classList.add('enc')
+					div.style.display = 'none'
+					
+					div.addEventListener('click', function(e) {
+						console.dir(e)
+						console.dir(this)
+							/*console.log(elem.tagName)
+							if(String(elem.tagName).toLowerCase() === 'div'){
+								console.dir(elem)
+								elem.classList.contains('card') ? elem.click() : ''
+							}*/
+						console.log('---------------')
+						e.path.map(elem => {
+							if(String(elem.tagName).toLowerCase() === 'body'){
+								Array.from(elem.children).map(elem => {
+									if(String(elem.tagName).toLowerCase() === 'ourrss-player'){
+										elem.setAttribute('src', div.src)
+										elem.setAttribute('name', div.name)
+										elem.setAttribute('title', div.title)
+										elem.setAttribute('image', div.image)
+										elem.setAttribute('play', true)
+									}
+								})
+							}
+						})
+					})
+					
+					epDivs.push(div)
+					
+				})
+				
+				const img = document.createElement('img')
+				img.setAttribute('src', image)
+				img.classList.add('image')
+				img.style.width = 'auto'
+				img.style.maxHeight = '10rem'
+				
+				const card = document.createElement('div')
 				card.name = name
-				card.title = title
-				card.src = src
 				card.image = image
+
+				card.classList += 'card center '
+
+				card.appendChild(img)
+				
+				epDivs.map(div => card.appendChild(div))
 				
 				card.onclick = function(e){
-					e.path.map(elem => {
-						if(String(elem.tagName).toLowerCase() === 'body'){
-							Array.from(elem.children).map(elem => {
-								if(String(elem.tagName).toLowerCase() === 'ourrss-player'){
-									elem.setAttribute('name', this.name)
-									elem.setAttribute('title', this.title)
-									elem.setAttribute('image', this.image)
-									elem.setAttribute('src', this.src)
-								}
-							})
+					console.dir(this)
+					
+					
+					
+					
+					if(this.style.height == '17rem'){
+						this.style.height = '10rem'
+						this.style.overflowY = 'auto'
+						console.dir(this)
+						Array.from(card.children).map(el => el.tagName == 'DIV' ? el.style.display = 'none' : '' )
+						Array.from(card.children).map(el => el.tagName == 'IMAGE' ? el.classList.add('shrinkImage') : '' )
+					}
+					else {
+						console.log('not 17rem')
+						this.style.height = '17rem'
+						this.style.overflowY = 'scroll'
+						//card.scrollIntoView({top: 0, behavior: 'smooth'})
+						Array.from(card.children).map(el => el.tagName == 'DIV' ? el.style.display = '' : '' )
+						Array.from(card.children).map(el => el.tagName == 'IMAGE' ? el.classList.remove('shrinkImage') : '' )
+						//Array.from(card.children).map(el => String(el.tagName).toLowerCase() == 'div' ? el.style.display = '' : '')
+						//card.children.div.style.opacity = 1
+						//setTimeout(() => this.scrollIntoView({top: 0, behavior: 'smooth'}), 525)
+					}
+					
+					
+					for(let prop in card.children){
+						if(String(card.children[prop].tagName).toLowerCase() == 'img'){
+							card.children[prop].classList.contains('shrinkImage') ? card.children[prop].classList.remove('shrinkImage') : card.children[prop].classList.add('shrinkImage')
 						}
-					})
+					}
+					
 				}
 				
 				this.dom.gridBox.appendChild(card)
